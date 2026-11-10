@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absen Sekolah</title>
+    <style>
+        *{box-sizing:border-box; font-family:Arial, sans-serif;}
+        body{background:#f0f0f0; padding:10px;}
+        .container{max-width:420px; margin:0 auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 0 10px #0002;}
+        .header{background:#2563eb; padding:20px; text-align:center; color:white; font-weight:bold; font-size:18px;}
+        .cam-box{background:#111827; padding:20px; text-align:center; position:relative;}
+        video{width:100%; border-radius:8px; display:none;}
+        .placeholder{color:#ccc; padding:40px 0;}
+        .play-icon{width:60px; height:60px; background:#fff3; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:24px; color:white;}
+        button{width:90%; padding:14px; border:none; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer; margin:6px 5%;}
+        .btn-blue{background:#2563eb; color:white;}
+        .btn-green{background:#22c55e; color:white;}
+        .btn-red{background:#ef4444; color:white;}
+        .input-group{padding:0 5%; margin-top:12px;}
+        label{display:block; color:#555; margin-bottom:4px; font-size:14px;}
+        input{width:100%; padding:12px; border:1px solid #ddd; border-radius:6px; font-size:15px;}
+        .status{color:#22c55e; font-weight:bold; padding:0 5%; margin:10px 0;}
+        .footer{background:#2563eb; height:30px; margin-top:20px;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">Absen Siswa</div>
+
+    <!-- Kamera -->
+    <div class="cam-box" id="camBox">
+        <div class="placeholder" id="camStatus">
+            Kamera belum aktif
+            <div class="play-icon" style="margin-top:15px;">▶️</div>
+        </div>
+        <video id="video" autoplay playsinline></video>
+    </div>
+
+    <button class="btn-blue" onclick="startCamera()">▶️ Mulai Kamera</button>
+    <button class="btn-green" onclick="absenSekarang()">✓ Absen Sekarang</button>
+    <button class="btn-red" onclick="stopCamera()">■ Matikan Kamera</button>
+
+    <!-- Form Data -->
+    <div class="input-group">
+        <label>Nama Siswa</label>
+        <input type="text" id="namaSiswa" placeholder="nama">
+    </div>
+    <div class="input-group">
+        <label>Kelas</label>
+        <input type="text" id="kelas" placeholder="class">
+    </div>
+    <div class="input-group">
+        <label>Status</label>
+        <div class="status" id="statusAbsen">Belum Absen</div>
+    </div>
+    <div class="input-group">
+        <label>Waktu</label>
+        <input type="text" id="waktu" placeholder="Waktu">
+    </div>
+
+    <div class="footer"></div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const camStatus = document.getElementById('camStatus');
+    let stream = null;
+
+    // 🔵 Mulai Kamera
+    async function startCamera(){
+        try{
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "user" }, // pakai "environment" untuk kamera belakang
+                audio: false
+            });
+            video.srcObject = stream;
+            video.style.display = 'block';
+            camStatus.style.display = 'none';
+        }catch(err){
+            alert("Izinkan akses kamera di pengaturan HP kamu ya!");
+            console.error(err);
+        }
+    }
+
+    // 🔴 Matikan Kamera
+    function stopCamera(){
+        if(stream){
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+        video.style.display = 'none';
+        camStatus.style.display = 'block';
+    }
+
+    // 🟢 Absen Sekarang
+    function absenSekarang(){
+        const nama = document.getElementById('namaSiswa').value.trim();
+        const kelas = document.getElementById('kelas').value.trim();
+        let waktu = document.getElementById('waktu').value.trim();
+
+        if(!waktu){
+            const sekarang = new Date();
+            waktu = sekarang.toLocaleDateString('id-ID') + ' ' + sekarang.toLocaleTimeString('id-ID');
+            document.getElementById('waktu').value = waktu;
+        }
+
+        if(!nama || !kelas){
+            alert("Isi Nama Siswa & Kelas dulu ya!");
+            return;
+        }
+
+        document.getElementById('statusAbsen').textContent = "Sudah Absen ✅";
+        document.getElementById('statusAbsen').style.color = "#2563eb";
+        
+        alert("Absen berhasil!\nNama: "+nama+"\nKelas: "+kelas+"\nWaktu: "+waktu);
+    }
+</script>
+
+</body>
+</html>
